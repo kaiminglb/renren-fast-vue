@@ -154,10 +154,13 @@
       init (id) { // 用2个await请求代替原版的then多层嵌套
         this.dataForm.id = id || 0
         this.getAllRoles()
+        if (this.dataForm.id) { // id存在是更新，需要回显；id不存在为0，是新增不需要回显
+          this.getOwnRoles(this.dataForm.id)
+        }
       },
       mounted () {
       },
-      // 表单提交
+      // 表单提交，密码不填后台不会修改
       dataFormSubmit () {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
