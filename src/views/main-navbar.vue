@@ -2,8 +2,8 @@
   <nav class="site-navbar" :class="'site-navbar--' + navbarLayoutType">
     <div class="site-navbar__header">
       <h1 class="site-navbar__brand" @click="$router.push({ name: 'home' })">
-        <a class="site-navbar__brand-lg" href="javascript:;">人人快速开发平台</a>
-        <a class="site-navbar__brand-mini" href="javascript:;">人人</a>
+        <a class="site-navbar__brand-lg" href="javascript:;">综合管理平台</a>
+        <a class="site-navbar__brand-mini" href="javascript:;">燃气</a>
       </h1>
     </div>
     <div class="site-navbar__body clearfix">
@@ -86,7 +86,7 @@
       updatePasswordHandle () {
         this.updatePassowrdVisible = true
         this.$nextTick(() => {
-          this.$refs.updatePassowrd.init()
+          this.$refs.updatePassowrd.init()  // updatePassowrd组件渲染完后，调用其init()方法
         })
       },
       // 退出
@@ -99,7 +99,7 @@
           this.$http({
             url: this.$http.adornUrl('/sys/logout'),
             method: 'post',
-            data: this.$http.adornData()
+            data: this.$http.adornData()  // 带时间参数
           }).then(({data}) => {
             if (data && data.code === 0) {
               clearLoginInfo()

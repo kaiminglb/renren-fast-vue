@@ -13,15 +13,18 @@ import { clearLoginInfo } from '@/utils'
 Vue.use(Router)
 
 // 开发环境不使用懒加载, 因为懒加载页面太多的话会造成webpack热更新太慢, 所以只有生产环境使用懒加载
+// 引入./import-development或./import-production,
+// 作用_import 在'@/views/' + file + '.vue'目录下找组件
 const _import = require('./import-' + process.env.NODE_ENV)
 
-// 全局路由(无需嵌套上左右整体布局)
+// 全局路由(无需嵌套上左右整体布局，占整个页面)
 const globalRoutes = [
   { path: '/404', component: _import('common/404'), name: '404', meta: { title: '404未找到' } },
   { path: '/login', component: _import('common/login'), name: 'login', meta: { title: '登录' } }
 ]
 
-// 主入口路由(需嵌套上左右整体布局)
+// 主入口路由(需嵌套上左右整体布局)，左侧导航菜单的路由
+// 一部分为/home,/theme这种声明式，一种为后端返回menulist
 const mainRoutes = {
   path: '/',
   component: _import('main'),
@@ -34,15 +37,15 @@ const mainRoutes = {
     // 2. iframeUrl: 是否通过iframe嵌套展示内容, '以http[s]://开头': 是, '': 否
     // 提示: 如需要通过iframe嵌套展示内容, 但不通过tab打开, 请自行创建组件使用iframe处理!
     { path: '/home', component: _import('common/home'), name: 'home', meta: { title: '首页' } },
-    { path: '/theme', component: _import('common/theme'), name: 'theme', meta: { title: '主题' } },
-    { path: '/demo-echarts', component: _import('demo/echarts'), name: 'demo-echarts', meta: { title: 'demo-echarts', isTab: true } },
+    { path: '/theme', component: _import('common/theme'), name: 'theme', meta: { title: '主题', isTab: true } },
+    { path: '/demo-echarts', component: _import('demo/echarts'), name: 'demo-echarts', meta: { title: '图表demo-echarts', isTab: true } },
     { path: '/demo-ueditor', component: _import('demo/ueditor'), name: 'demo-ueditor', meta: { title: 'demo-ueditor', isTab: true } }
   ],
   beforeEnter (to, from, next) {
     let token = Vue.cookie.get('token')
     if (!token || !/\S/.test(token)) {
       clearLoginInfo()
-      next({ name: 'login' })
+      next({ name: 'login' }) // 调到登录
     }
     next()
   }
@@ -51,10 +54,12 @@ const mainRoutes = {
 const router = new Router({
   mode: 'hash',
   scrollBehavior: () => ({ y: 0 }),
-  isAddDynamicMenuRoutes: false, // 是否已经添加动态(菜单)路由
+  // 是否已经添加动态(菜单)路由，从后台获得menuList，添加了动态路由后为true
+  isAddDynamicMenuRoutes: false,
   routes: globalRoutes.concat(mainRoutes)
 })
 
+// menu根据后台菜单数据生成，因此不鉴权了
 router.beforeEach((to, from, next) => {
   // 添加动态(菜单)路由
   // 1. 已经添加 or 全局路由, 直接访问
@@ -68,10 +73,13 @@ router.beforeEach((to, from, next) => {
       params: http.adornParams()
     }).then(({data}) => {
       if (data && data.code === 0) {
+        // 生产左侧导航菜单
         fnAddDynamicMenuRoutes(data.menuList)
         router.options.isAddDynamicMenuRoutes = true
+        // 菜单、权限保存到sessionStorage中
         sessionStorage.setItem('menuList', JSON.stringify(data.menuList || '[]'))
         sessionStorage.setItem('permissions', JSON.stringify(data.permissions || '[]'))
+        // 获取菜单后，再进入此路由
         next({ ...to, replace: true })
       } else {
         sessionStorage.setItem('menuList', '[]')
@@ -86,8 +94,10 @@ router.beforeEach((to, from, next) => {
 })
 
 /**
- * 判断当前路由类型, global: 全局路由, main: 主入口路由
+ * 判断当前路由类型, global: 全局路由, main: 主入口路由，及生成左侧的导航菜单
  * @param {*} route 当前路由
+ * @param {*} globalRoutes = [] 全局路由，默认值为[],上面设置了2个值
+ *
  */
 function fnCurrentRouteType (route, globalRoutes = []) {
   var temp = []
@@ -98,6 +108,7 @@ function fnCurrentRouteType (route, globalRoutes = []) {
       temp = temp.concat(globalRoutes[i].children)
     }
   }
+  // 判断 子路由
   return temp.length >= 1 ? fnCurrentRouteType(route, temp) : 'main'
 }
 
@@ -112,8 +123,10 @@ function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
     if (menuList[i].list && menuList[i].list.length >= 1) {
       temp = temp.concat(menuList[i].list)
     } else if (menuList[i].url && /\S/.test(menuList[i].url)) {
+      // 去掉开头的/
       menuList[i].url = menuList[i].url.replace(/^\//, '')
       var route = {
+        // -替换path、name的/
         path: menuList[i].url.replace('/', '-'),
         component: null,
         name: menuList[i].url.replace('/', '-'),

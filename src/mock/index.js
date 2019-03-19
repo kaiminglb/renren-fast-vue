@@ -11,6 +11,7 @@ import * as sysUser from './modules/sys-user'
 // tips
 // 1. 开启/关闭[业务模块]拦截, 通过调用fnCreate方法[isOpen参数]设置.
 // 2. 开启/关闭[业务模块中某个请求]拦截, 通过函数返回对象中的[isOpen属性]设置.
+// mock关闭，连接后台
 fnCreate(common, false)
 fnCreate(jobSchedule, false)
 fnCreate(oss, false)
@@ -19,6 +20,16 @@ fnCreate(sysLog, false)
 fnCreate(sysMenu, false)
 fnCreate(sysRole, false)
 fnCreate(sysUser, false)
+
+// mock开启，模拟数据
+// fnCreate(common, true)
+// fnCreate(jobSchedule, true)
+// fnCreate(oss, true)
+// fnCreate(sysConfig, true)
+// fnCreate(sysLog, true)
+// fnCreate(sysMenu, true)
+// fnCreate(sysRole, true)
+// fnCreate(sysUser, true)
 
 /**
  * 创建mock模拟数据
@@ -30,6 +41,7 @@ function fnCreate (mod, isOpen = true) {
     for (var key in mod) {
       ((res) => {
         if (res.isOpen !== false) {
+          // mock参数：url,请求类型get|post，响应数据
           Mock.mock(new RegExp(res.url), res.type, (opts) => {
             opts['data'] = opts.body ? JSON.parse(opts.body) : null
             delete opts.body

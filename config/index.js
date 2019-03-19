@@ -14,10 +14,10 @@ module.exports = {
     // 代理列表, 是否开启代理通过[./dev.env.js]配置
     proxyTable: devEnv.OPEN_PROXY === false ? {} : {
       '/proxyApi': {
-        target: 'http://demo.renren.io/renren-fast/',
-        changeOrigin: true,
+        target: 'http://demo.renren.io/renren-fast/', //目标接口域名
+        changeOrigin: true,   //是否跨域
         pathRewrite: {
-          '^/proxyApi': '/'
+          '^/proxyApi': '/'   //重写接口
         }
       }
     },

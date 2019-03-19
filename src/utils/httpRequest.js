@@ -37,18 +37,19 @@ http.interceptors.response.use(response => {
 })
 
 /**
- * 请求地址处理
+ * 请求地址处理 ，返回请求地址的字符串
+ *    是用baseUrl 还是 代理的前缀  来拼接请求地址
  * @param {*} actionName action方法名称
  */
 http.adornUrl = (actionName) => {
-  // 非生产环境 && 开启代理, 接口前缀统一使用[/proxyApi/]前缀做代理拦截!
+  // 非生产环境 && 开启代理, 接口前缀统一使用[/proxyApi/]前缀做代理拦截!  否则就用配置的SITE_CONFIG.baseUrl
   return (process.env.NODE_ENV !== 'production' && process.env.OPEN_PROXY ? '/proxyApi/' : window.SITE_CONFIG.baseUrl) + actionName
 }
 
 /**
  * get请求参数处理
  * @param {*} params 参数对象
- * @param {*} openDefultParams 是否开启默认参数?
+ * @param {*} openDefultParams 是否开启默认参数?  默认参数t=时间戳
  */
 http.adornParams = (params = {}, openDefultParams = true) => {
   var defaults = {
@@ -62,7 +63,7 @@ http.adornParams = (params = {}, openDefultParams = true) => {
  * @param {*} data 数据对象
  * @param {*} openDefultdata 是否开启默认数据?
  * @param {*} contentType 数据格式
- *  json: 'application/json; charset=utf-8'
+ *  json: 'application/json; charset=utf-8' 默认提交json数据
  *  form: 'application/x-www-form-urlencoded; charset=utf-8'
  */
 http.adornData = (data = {}, openDefultdata = true, contentType = 'json') => {

@@ -16,6 +16,7 @@
       v-loading="dataListLoading"
       @selection-change="selectionChangeHandle"
       style="width: 100%;">
+      <!-- 选择checkbox -->
       <el-table-column
         type="selection"
         header-align="center"
@@ -76,11 +77,12 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页插件 -->
     <el-pagination
       @size-change="sizeChangeHandle"
       @current-change="currentChangeHandle"
       :current-page="pageIndex"
-      :page-sizes="[10, 20, 50, 100]"
+      :page-sizes="[10, 20, 50]"
       :page-size="pageSize"
       :total="totalPage"
       layout="total, sizes, prev, pager, next, jumper">
@@ -99,23 +101,24 @@
           userName: ''
         },
         dataList: [],
-        pageIndex: 1,
-        pageSize: 10,
-        totalPage: 0,
-        dataListLoading: false,
-        dataListSelections: [],
-        addOrUpdateVisible: false
+        pageIndex: 1, // 当前页
+        pageSize: 10, // 每页10条
+        totalPage: 0, // 总页
+        dataListLoading: false, // 是否加载
+        dataListSelections: [], // 选中的items
+        addOrUpdateVisible: false // 添加，更新框是否可见
       }
     },
     components: {
       AddOrUpdate
     },
-    activated () {
+    activated () {  // 激活的回调
       this.getDataList()
     },
     methods: {
       // 获取数据列表
       getDataList () {
+        // 加载图标
         this.dataListLoading = true
         this.$http({
           url: this.$http.adornUrl('/sys/user/list'),
@@ -155,7 +158,7 @@
       addOrUpdateHandle (id) {
         this.addOrUpdateVisible = true
         this.$nextTick(() => {
-          this.$refs.addOrUpdate.init(id)
+          this.$refs.addOrUpdate.init(id) // addOrUpdate渲染完后，初始化
         })
       },
       // 删除

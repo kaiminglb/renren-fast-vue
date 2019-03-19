@@ -43,7 +43,7 @@
   export default {
     data () {
       var validatePassword = (rule, value, callback) => {
-        if (!this.dataForm.id && !/\S/.test(value)) {
+        if (!this.dataForm.id && !/\S/.test(value)) { // \S非空白字符
           callback(new Error('密码不能为空'))
         } else {
           callback()
@@ -74,7 +74,7 @@
       }
       return {
         visible: false,
-        roleList: [],
+        roleList: [], // 所有的角色
         dataForm: {
           id: 0,
           userName: '',
@@ -83,7 +83,7 @@
           salt: '',
           email: '',
           mobile: '',
-          roleIdList: [],
+          roleIdList: [], // 用户拥有角色IDS
           status: 1
         },
         dataRule: {
@@ -108,37 +108,57 @@
       }
     },
     methods: {
-      init (id) {
-        this.dataForm.id = id || 0
-        this.$http({
-          url: this.$http.adornUrl('/sys/role/select'),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({data}) => {
+      // 获取所有角色
+      async getAllRoles () {
+        try {
+          let result = await this.$http({ // 1 请求所有角色
+            url: this.$http.adornUrl('/sys/role/select'),
+            method: 'get',
+            params: this.$http.adornParams()
+          })
+          // console.log(result)
+          let data = result.data
           this.roleList = data && data.code === 0 ? data.list : []
-        }).then(() => {
+          // 2 显示form表单，并用钩子函数重置表单
           this.visible = true
           this.$nextTick(() => {
             this.$refs['dataForm'].resetFields()
           })
-        }).then(() => {
-          if (this.dataForm.id) {
-            this.$http({
-              url: this.$http.adornUrl(`/sys/user/info/${this.dataForm.id}`),
-              method: 'get',
-              params: this.$http.adornParams()
-            }).then(({data}) => {
-              if (data && data.code === 0) {
-                this.dataForm.userName = data.user.username
-                this.dataForm.salt = data.user.salt
-                this.dataForm.email = data.user.email
-                this.dataForm.mobile = data.user.mobile
-                this.dataForm.roleIdList = data.user.roleIdList
-                this.dataForm.status = data.user.status
-              }
-            })
+        } catch (err) {
+          console.log(err)
+        }
+      },
+      /**
+       *  查询该用户自己的角色,回显
+       *  @param {*} id 用户id
+       */
+      async getOwnRoles (id) {
+        try {
+          let result = await this.$http({
+            url: this.$http.adornUrl(`/sys/user/info/${id}`),
+            method: 'get',
+            params: this.$http.adornParams()
+          })
+          // console.log(result)
+          let data = result.data
+          if (data && data.code === 0) {
+            this.dataForm.userName = data.user.username
+            this.dataForm.salt = data.user.salt
+            this.dataForm.email = data.user.email
+            this.dataForm.mobile = data.user.mobile
+            this.dataForm.roleIdList = data.user.roleIdList
+            this.dataForm.status = data.user.status
           }
-        })
+        } catch (err) {
+          console.log(err)
+        }
+      },
+      init (id) { // 用2个await请求代替原版的then多层嵌套
+        this.dataForm.id = id || 0
+        this.getAllRoles()
+        if (this.dataForm.id) { // id存在是更新，需要回显；id不存在为0，是新增不需要回显
+          this.getOwnRoles(this.dataForm.id)
+        }
       },
       // 表单提交
       dataFormSubmit () {
@@ -165,7 +185,7 @@
                   duration: 1500,
                   onClose: () => {
                     this.visible = false
-                    this.$emit('refreshDataList')
+                    this.$emit('refreshDataList') // 触发父组件refreshDataList方法，刷新列表
                   }
                 })
               } else {

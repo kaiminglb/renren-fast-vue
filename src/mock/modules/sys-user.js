@@ -19,9 +19,9 @@ for (let i = 0; i < Math.floor(Math.random() * 10 + 1); i++) {
 export function list () {
   return {
     // isOpen: false,
-    url: '/sys/user/list',
-    type: 'get',
-    data: {
+    url: '/sys/user/list',   // 请求路径
+    type: 'get',            // 请求类型
+    data: {                 // 返回响应数据
       'msg': 'success',
       'code': 0,
       'page': {
@@ -66,9 +66,9 @@ export function updatePassword () {
 export function add () {
   return {
     // isOpen: false,
-    url: '/sys/user/save',
-    type: 'post',
-    data: {
+    url: '/sys/user/save',  // 请求路径
+    type: 'post',           // 请求类型
+    data: {                 // 响应数据对象
       'msg': 'success',
       'code': 0
     }

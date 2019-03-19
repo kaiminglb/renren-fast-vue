@@ -41,7 +41,7 @@
   export default {
     data () {
       return {
-        dynamicMenuRoutes: []
+        dynamicMenuRoutes: [] // 动态菜单路由
       }
     },
     components: {

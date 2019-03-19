@@ -41,7 +41,7 @@
   export default {
     data () {
       return {
-        dataForm: {
+        dataForm: { // 表单提交的数据
           userName: '',
           password: '',
           uuid: '',
@@ -80,7 +80,7 @@
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
-                this.$cookie.set('token', data.token)
+                this.$cookie.set('token', data.token) // VueCookie
                 this.$router.replace({ name: 'home' })
               } else {
                 this.getCaptcha()
