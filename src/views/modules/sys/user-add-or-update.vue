@@ -111,13 +111,12 @@
       // 获取所有角色
       async getAllRoles () {
         try {
-          let result = await this.$http({ // 1 请求所有角色
+          let {data} = await this.$http({ // 1 请求所有角色
             url: this.$http.adornUrl('/sys/role/select'),
             method: 'get',
             params: this.$http.adornParams()
           })
-          // console.log(result)
-          let data = result.data
+          // console.log(data)
           this.roleList = data && data.code === 0 ? data.list : []
           // 2 显示form表单，并用钩子函数重置表单
           this.visible = true
@@ -134,13 +133,12 @@
        */
       async getOwnRoles (id) {
         try {
-          let result = await this.$http({
+          let {data} = await this.$http({
             url: this.$http.adornUrl(`/sys/user/info/${id}`),
             method: 'get',
             params: this.$http.adornParams()
           })
-          // console.log(result)
-          let data = result.data
+          // console.log(data)
           if (data && data.code === 0) {
             this.dataForm.userName = data.user.username
             this.dataForm.salt = data.user.salt
@@ -156,9 +154,8 @@
       init (id) { // 用2个await请求代替原版的then多层嵌套
         this.dataForm.id = id || 0
         this.getAllRoles()
-        if (this.dataForm.id) { // id存在是更新，需要回显；id不存在为0，是新增不需要回显
-          this.getOwnRoles(this.dataForm.id)
-        }
+      },
+      mounted () {
       },
       // 表单提交
       dataFormSubmit () {

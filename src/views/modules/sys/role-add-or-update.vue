@@ -33,13 +33,14 @@
   export default {
     data () {
       return {
-        visible: false,
-        menuList: [],
+        visible: false, // 新增、更新弹窗是否可见
+        menuList: [], // 所有menus
+        checked: [], // 选中节点
         menuListTreeProps: {
           label: 'name',
           children: 'children'
         },
-        dataForm: {
+        dataForm: { // 角色的基本信息
           id: 0,
           roleName: '',
           remark: ''
@@ -53,39 +54,74 @@
       }
     },
     methods: {
-      init (id) {
-        this.dataForm.id = id || 0
-        this.$http({
-          url: this.$http.adornUrl('/sys/menu/list'),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({data}) => {
-          this.menuList = treeDataTranslate(data, 'menuId')
-        }).then(() => {
-          this.visible = true
-          this.$nextTick(() => {
-            this.$refs['dataForm'].resetFields()
-            this.$refs.menuListTree.setCheckedKeys([])
+      /**
+       * 请求所有menu，并把flat转为tree
+       *  */
+      async getAllMenus () {
+        try {
+          // 1 请求所有menu
+          let {data} = await this.$http({ // 1 请求所有角色
+            url: this.$http.adornUrl('/sys/menu/list'),
+            method: 'get',
+            params: this.$http.adornParams()
           })
-        }).then(() => {
-          if (this.dataForm.id) {
-            this.$http({
-              url: this.$http.adornUrl(`/sys/role/info/${this.dataForm.id}`),
-              method: 'get',
-              params: this.$http.adornParams()
-            }).then(({data}) => {
-              if (data && data.code === 0) {
-                this.dataForm.roleName = data.role.roleName
-                this.dataForm.remark = data.role.remark
-                var idx = data.role.menuIdList.indexOf(this.tempKey)
-                if (idx !== -1) {
-                  data.role.menuIdList.splice(idx, data.role.menuIdList.length - idx)
-                }
-                this.$refs.menuListTree.setCheckedKeys(data.role.menuIdList)
-              }
-            })
+          // 2 flat转为tree
+          this.menuList = treeDataTranslate(data, 'menuId') // Flat数据转为tree
+        } catch (err) {
+          console.log(err)
+        }
+      },
+      /**
+       * 获得角色的信息及该角色拥有权限菜单
+       *  */
+      async getRoleInfo (id) {
+        try {
+          let {data} = await this.$http({
+            url: this.$http.adornUrl(`/sys/role/info/${this.dataForm.id}`),
+            method: 'get',
+            params: this.$http.adornParams()
+          })
+          // console.info(data)
+          if (data && data.code === 0) { // 改变dataForm\checked数据
+            this.dataForm.roleName = data.role.roleName
+            this.dataForm.remark = data.role.remark
+            let idx = data.role.menuIdList.indexOf(this.tempKey)
+            if (idx !== -1) {
+              data.role.menuIdList.splice(idx, data.role.menuIdList.length - idx)
+            }
+            this.checked = data.role.menuIdList
+          }
+        } catch (e) {
+          console.log(e)
+        }
+      },
+      /**
+       * 3 重置表单、清空树的选中项，设置回显数据
+       *  */
+      show () {
+        this.visible = true
+        this.$nextTick(() => {
+          // if (!this.dataForm.id) { // 新增重置表单
+          //   this.$refs['dataForm'].resetFields()
+          // }
+          // this.$refs.menuListTree.setCheckedKeys([])
+          if (this.checked) {
+            this.$refs.menuListTree.setCheckedKeys(this.checked)
           }
         })
+      },
+      // 初始化弹窗
+      async init (id) {
+        this.checked = []
+        this.dataForm = {}
+        this.dataForm.id = id || 0 // 新增id为空，赋值为0
+        await this.getAllMenus()
+        // 获取修改数据
+        if (this.dataForm.id) {
+          await this.getRoleInfo(this.dataForm.id)
+        }
+        // 渲染
+        this.show()
       },
       // 表单提交
       dataFormSubmit () {
@@ -100,13 +136,15 @@
                 'remark': this.dataForm.remark,
                 'menuIdList': [].concat(this.$refs.menuListTree.getCheckedKeys(), [this.tempKey], this.$refs.menuListTree.getHalfCheckedKeys())
               })
-            }).then(({data}) => {
+            }).then(({data}) => { // 从返回结果中取data属性
               if (data && data.code === 0) {
                 this.$message({
                   message: '操作成功',
                   type: 'success',
                   duration: 1500,
                   onClose: () => {
+                    this.checked = []
+                    this.dataForm = {}
                     this.visible = false
                     this.$emit('refreshDataList')
                   }

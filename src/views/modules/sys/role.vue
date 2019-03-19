@@ -1,5 +1,6 @@
 <template>
   <div class="mod-role">
+    <!-- 查询表单 -->
     <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
       <el-form-item>
         <el-input v-model="dataForm.roleName" placeholder="角色名称" clearable></el-input>
@@ -16,12 +17,14 @@
       v-loading="dataListLoading"
       @selection-change="selectionChangeHandle"
       style="width: 100%;">
+      <!-- 选择框 -->
       <el-table-column
         type="selection"
         header-align="center"
         align="center"
         width="50">
       </el-table-column>
+      <!-- 字段 -->
       <el-table-column
         prop="roleId"
         header-align="center"
@@ -48,6 +51,7 @@
         width="180"
         label="创建时间">
       </el-table-column>
+      <!-- 操作栏 -->
       <el-table-column
         fixed="right"
         header-align="center"
@@ -60,6 +64,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页栏 -->
     <el-pagination
       @size-change="sizeChangeHandle"
       @current-change="currentChangeHandle"
@@ -69,7 +74,7 @@
       :total="totalPage"
       layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
-    <!-- 弹窗, 新增 / 修改 -->
+    <!-- 子组件 弹窗, 新增 / 修改 ；子组件触发refreshDataList，用于列表更新 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
   </div>
 </template>
@@ -94,7 +99,7 @@
     components: {
       AddOrUpdate
     },
-    activated () {
+    activated () { // 激活就刷新列表
       this.getDataList()
     },
     methods: {
@@ -138,40 +143,50 @@
       // 新增 / 修改
       addOrUpdateHandle (id) {
         this.addOrUpdateVisible = true
-        this.$nextTick(() => {
+        this.$nextTick(() => {  // 等子组件渲染后，调用其init方法，
           this.$refs.addOrUpdate.init(id)
         })
       },
+      // 发起请求删除ids
+      async deleteIds (ids) {
+        try {
+          let {data} = await this.$http({
+            url: this.$http.adornUrl('/sys/role/delete'),
+            method: 'post',
+            data: this.$http.adornData(ids, false)
+          })
+          // console.log(result)
+          // 成功
+          if (data && data.code === 0) {
+            this.$message({
+              message: '操作成功',
+              type: 'success',
+              duration: 1500,
+              onClose: () => {
+                this.getDataList()
+              }
+            })
+          } else { // 失败
+            this.$message.error(data.msg)
+          }
+        } catch (err) {
+          console.log(err)
+        }
+      },
       // 删除
-      deleteHandle (id) {
-        var ids = id ? [id] : this.dataListSelections.map(item => {
+      deleteHandle (id) { // 可以删一条，也可以批量删除
+        let ids = id ? [id] : this.dataListSelections.map(item => {
           return item.roleId
         })
         this.$confirm(`确定对[id=${ids.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
-        }).then(() => {
-          this.$http({
-            url: this.$http.adornUrl('/sys/role/delete'),
-            method: 'post',
-            data: this.$http.adornData(ids, false)
-          }).then(({data}) => {
-            if (data && data.code === 0) {
-              this.$message({
-                message: '操作成功',
-                type: 'success',
-                duration: 1500,
-                onClose: () => {
-                  this.getDataList()
-                }
-              })
-            } else {
-              this.$message.error(data.msg)
-            }
-          })
-        }).catch(() => {})
+        }).then(() => { // confirm的回调必须写箭头函数
+          this.deleteIds(ids)
+        })
       }
+      // end delete
     }
   }
 </script>
