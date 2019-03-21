@@ -16,6 +16,7 @@
         width="80"
         label="ID">
       </el-table-column>
+      <!-- 名称列为tree,treeKey表示 -->
       <table-tree-column
         prop="name"
         header-align="center"

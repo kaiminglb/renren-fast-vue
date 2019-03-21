@@ -5,7 +5,7 @@
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
       <el-form-item label="角色名称" prop="roleName">
-        <el-input v-model="dataForm.roleName" placeholder="角色名称"></el-input>
+        <el-input v-model.trim="dataForm.roleName" placeholder="角色名称"></el-input>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="dataForm.remark" placeholder="备注"></el-input>
@@ -87,6 +87,7 @@
             this.dataForm.remark = data.role.remark
             let idx = data.role.menuIdList.indexOf(this.tempKey)
             if (idx !== -1) {
+              // 把tempKey: -666666，及之后的半选节点删除。半选的节点可能是导航菜单
               data.role.menuIdList.splice(idx, data.role.menuIdList.length - idx)
             }
             this.checked = data.role.menuIdList
@@ -105,7 +106,7 @@
           //   this.$refs['dataForm'].resetFields()
           // }
           // this.$refs.menuListTree.setCheckedKeys([])
-          if (this.checked) {
+          if (this.checked) { // 设置全选节点，半选的在getRoleInfo()方法中已过滤了
             this.$refs.menuListTree.setCheckedKeys(this.checked)
           }
         })
@@ -134,6 +135,7 @@
                 'roleId': this.dataForm.id || undefined,
                 'roleName': this.dataForm.roleName,
                 'remark': this.dataForm.remark,
+                // 全选节点,间隔字符'-666666',半选节点
                 'menuIdList': [].concat(this.$refs.menuListTree.getCheckedKeys(), [this.tempKey], this.$refs.menuListTree.getHalfCheckedKeys())
               })
             }).then(({data}) => { // 从返回结果中取data属性

@@ -14,22 +14,22 @@
   export default {
     name: 'table-tree-column',
     props: {
-      prop: {
+      prop: { // 显示的值
         type: String
       },
-      treeKey: {
+      treeKey: { // 行数据的id字段，默认'id'
         type: String,
         default: 'id'
       },
-      parentKey: {
+      parentKey: { // 行数据的父id字段，默认'parentId'
         type: String,
         default: 'parentId'
       },
-      levelKey: {
+      levelKey: { // 行数据的层级
         type: String,
         default: '_level'
       },
-      childKey: {
+      childKey: { // 行数据的孩子字段，默认为'children'
         type: String,
         default: 'children'
       }
@@ -49,17 +49,18 @@
       },
       // 切换处理
       toggleHandle (index, row) {
+        // console.info(scope)
         if (this.hasChild(row)) {
           var data = this.$parent.store.states.data.slice(0)
           data[index]._expanded = !data[index]._expanded
           if (data[index]._expanded) {
-            data = data.splice(0, index + 1).concat(row[this.childKey]).concat(data)
+            data = data.splice(0, index + 1).concat(row[this.childKey]).concat(data) // 中间插子节点
           } else {
             data = this.removeChildNode(data, row[this.treeKey])
           }
-          this.$parent.store.commit('setData', data)
+          this.$parent.store.commit('setData', data) // 设置表格数据
           this.$nextTick(() => {
-            this.$parent.doLayout()
+            this.$parent.doLayout() // 对 Table 进行重新布局
           })
         }
       },
