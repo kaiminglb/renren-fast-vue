@@ -30,7 +30,7 @@
       getName () {
         return `#icon-${this.name}`
       },
-      getClassName () {
+      getClassName () { // 前2个svg的class，最后一个是传进来的className
         return [
           'icon-svg',
           `icon-svg__${this.name}`,

@@ -23,6 +23,10 @@
             <icon-svg name="editor" class="site-sidebar__menu-icon"></icon-svg>
             <span slot="title">ueditor</span>
           </el-menu-item>
+          <el-menu-item index="demo-stepsForm" @click="$router.push({ name: 'demo-steps-form' })">
+            <icon-svg name="editor" class="site-sidebar__menu-icon"></icon-svg>
+            <span slot="title">stepsForm</span>
+          </el-menu-item>
         </el-submenu>
         <sub-menu
           v-for="menu in menuList"

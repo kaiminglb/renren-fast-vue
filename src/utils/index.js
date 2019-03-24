@@ -20,9 +20,10 @@ export function isAuth (key) {
 }
 
 /**
- * 树形数据转换，平行的数据 转为 父子结构的、即children属性放子节点数据
+ * 树形数据转换，平行的数据 转为 tree结构的
+ * 即children属性放子节点数据,_level计算层级
  * @param {*} data 平行数据
- * @param {*} id  id属性 默认值为'id'
+ * @param {*} id  id属性 数据唯一标识字段  默认值为'id'
  * @param {*} pid  父节点的id,默认值为'parentId'
  */
 export function treeDataTranslate (data, id = 'id', pid = 'parentId') {

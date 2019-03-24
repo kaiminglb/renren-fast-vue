@@ -20,47 +20,74 @@
     <!-- 各步骤表单 -->
           <el-form :model="dataForm" :rules="dataRule" ref="dataForm" label-width="100px">
             <div v-if="active == 0">
-                <el-form-item  label="用户名" prop="userName">
-                    <el-input v-model.trim="dataForm.userName" placeholder="登录帐号"></el-input>
-                </el-form-item>
-                <el-form-item label="密码" prop="password" :class="{ 'is-required': !dataForm.id }">
-                    <el-input v-model.trim="dataForm.password" type="password" placeholder="密码"></el-input>
-                </el-form-item>
-                <el-form-item label="确认密码" prop="comfirmPassword" :class="{ 'is-required': !dataForm.id }">
-                    <el-input v-model.trim="dataForm.comfirmPassword" type="password" placeholder="确认密码"></el-input>
-                </el-form-item>
-                <el-form-item label="邮箱" prop="email">
-                    <el-input v-model.trim="dataForm.email" placeholder="邮箱"></el-input>
-                </el-form-item>
+              <el-row>
+                <el-col :span="12">
+                  <el-form-item  label="用户名" prop="userName">
+                      <el-input v-model.trim="dataForm.userName" placeholder="登录帐号" key="userName"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="密码" prop="password" :class="{ 'is-required': !dataForm.id }">
+                      <el-input v-model.trim="dataForm.password" type="password" placeholder="密码" key="password"></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="12">
+                  <el-form-item label="确认密码" prop="comfirmPassword" :class="{ 'is-required': !dataForm.id }">
+                      <el-input v-model.trim="dataForm.comfirmPassword" type="password" placeholder="确认密码" key="comfirmPassword"></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+                
             </div>
             <div v-if="active == 1">
-                <el-form-item label="手机号" prop="mobile">
-                    <el-input v-model.trim="dataForm.mobile" placeholder="手机号"></el-input>
-                </el-form-item>
+              <el-row>
+                <el-col :span="12">
+                  <el-form-item label="邮箱" prop="email">
+                      <el-input  v-model.trim="dataForm.email" placeholder="邮箱。如xxxx@163.com" key="email"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="手机号" prop="mobile">
+                      <el-input v-model.trim="dataForm.mobile" placeholder="手机号"></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
             </div>
             <div v-if="active == 2">
-                <el-form-item label="状态" size="mini" prop="status">
-                <el-radio-group v-model="dataForm.status">
-                    <el-radio-button :label="0">禁用</el-radio-button>
-                    <el-radio-button :label="1">正常</el-radio-button>
-                </el-radio-group>
-                </el-form-item>
+              <el-row>
+                <el-col :span="12">
+                  <el-form-item label="状态" size="mini" prop="status">
+                  <el-radio-group v-model="dataForm.status">
+                      <el-radio-button :label="0">禁用</el-radio-button>
+                      <el-radio-button :label="1">正常</el-radio-button>
+                  </el-radio-group>
+                  </el-form-item>
+                </el-col>
+              </el-row>  
             </div>
 
-            <el-form-item class="btn-bottom">
-                <el-button type="info">
-                    取消
-                </el-button>
-                <el-button v-if="active < 2" type="primary" @click="next">
-                    Next
-                </el-button>
-                <el-button v-if="active == 2" type="success" @click="done">
-                    Done
-                </el-button>
-                <el-button v-if="active > 0" style="margin-left: 8px" @click="prev">
-                    Previous
-                </el-button>
-            </el-form-item>
+            <el-row>
+              <el-col :span="12">
+              </el-col>
+              <el-col :span="12">
+                <el-form-item class="btn-bottom">
+                    <el-button type="info">
+                        取消
+                    </el-button>
+                    <el-button v-if="active < 2" type="primary" @click="next">
+                        Next
+                    </el-button>
+                    <el-button v-if="active == 2" type="success" @click="done">
+                        Done
+                    </el-button>
+                    <el-button v-if="active > 0" style="margin-left: 8px" @click="prev">
+                        Previous
+                    </el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
 
           </el-form>
         </el-card>
@@ -153,6 +180,8 @@
         })
       },
       prev () {
+        // 清空验证
+        this.$refs[`dataForm`].clearValidate()
         this.active--
       },
       done () {
@@ -188,7 +217,7 @@
       }
     }
     .el-form {
-      width: 500px;
+      width: 700px;
       margin: 40px auto;
     }
     .btn-bottom{

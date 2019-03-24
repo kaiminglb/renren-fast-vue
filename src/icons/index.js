@@ -14,8 +14,12 @@ import Vue from 'vue'
 import IconSvg from '@/components/icon-svg'
 import './iconfont.js'
 
+// 自定义的小图标组件
 Vue.component('IconSvg', IconSvg)
 
+// file 文件夹（包含子目录）下面的找所有文件名以 .svg 结尾的文件能被 require 的文件。
+// 就是说可以通过正则匹配引入相应的文件模块。
+// svg-sprite-loader，可以将多个svg打包成svg-spite
 const svgFiles = require.context('./svg', true, /\.svg$/)
 const iconList = svgFiles.keys().map(item => svgFiles(item))
 

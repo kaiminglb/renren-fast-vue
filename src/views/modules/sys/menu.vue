@@ -16,7 +16,7 @@
         width="80"
         label="ID">
       </el-table-column>
-      <!-- 名称列为tree,treeKey表示 -->
+      <!-- 名称列为tree,treeKey="menuId"表示唯一标识，该列显示的字段prop="name" -->
       <table-tree-column
         prop="name"
         header-align="center"
@@ -118,6 +118,7 @@
           method: 'get',
           params: this.$http.adornParams()
         }).then(({data}) => {
+           // treeDataTranslate(data, 'menuId', 'parentId') parentId默认值可以省略
           this.dataList = treeDataTranslate(data, 'menuId')
           this.dataListLoading = false
         })
@@ -135,26 +136,27 @@
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
-        }).then(() => {
-          this.$http({
+        }).then(async () => {
+          let {data} = await this.$http({
             url: this.$http.adornUrl(`/sys/menu/delete/${id}`),
             method: 'post',
             data: this.$http.adornData()
-          }).then(({data}) => {
-            if (data && data.code === 0) {
-              this.$message({
-                message: '操作成功',
-                type: 'success',
-                duration: 1500,
-                onClose: () => {
-                  this.getDataList()
-                }
-              })
-            } else {
-              this.$message.error(data.msg)
-            }
           })
-        }).catch(() => {})
+          if (data && data.code === 0) {
+            this.$message({
+              message: '操作成功',
+              type: 'success',
+              duration: 1500,
+              onClose: () => {
+                this.getDataList()
+              }
+            })
+          } else {
+            this.$message.error(data.msg)
+          }
+        }).catch(() => {
+          console.log('cancel')
+        })
       }
     }
   }
